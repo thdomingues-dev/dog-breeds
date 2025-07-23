@@ -1,0 +1,36 @@
+services:
+  # Backend API Service
+  - type: web
+    name: dog-breeds-api
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    # Auto-deploy on push to main branch
+
+  # Frontend Web Service  
+  - type: web
+    name: dog-breeds-frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: echo "Using Docker build"
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: dog-breeds-api
+          property: host
+        # This will automatically set the API URL to the backend service
+    # Auto-deploy on push to main branch 
