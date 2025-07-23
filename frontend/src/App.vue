@@ -1,14 +1,51 @@
 <script setup>
-  import { ref } from 'vue';
+  import { ref, watch, onMounted, onUnmounted } from 'vue';
   import BreedList from './components/BreedList.vue';
   import FavoritesList from './components/FavoritesList.vue';
   import DogIcon from './components/DogIcon.vue';
 
-  const tab = ref('breeds');
+  const TAB_BREEDS = 'breeds';
+  const TAB_FAVORITES = 'favorites';
+  const VALID_TABS = [TAB_BREEDS, TAB_FAVORITES];
 
-  const goToHome = () => {
-    tab.value = 'breeds';
-  };
+  function getTabFromUrl() {
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    return VALID_TABS.includes(tab) ? tab : TAB_BREEDS;
+  }
+
+  function setTabInUrl(tab) {
+    const url = new URL(window.location.href);
+    if (tab === TAB_BREEDS) {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', tab);
+    }
+    window.history.pushState({}, '', url);
+  }
+
+  const tab = ref(getTabFromUrl());
+
+  watch(tab, setTabInUrl);
+
+  function syncTabWithUrl() {
+    tab.value = getTabFromUrl();
+  }
+
+  onMounted(() => window.addEventListener('popstate', syncTabWithUrl));
+  onUnmounted(() => window.removeEventListener('popstate', syncTabWithUrl));
+
+  watch(
+    tab,
+    newTab => {
+      document.title =
+        newTab === TAB_FAVORITES ? 'My Favorites - Dog Breeds Explorer' : 'Dog Breeds Explorer';
+    },
+    { immediate: true }
+  );
+
+  function goToHome() {
+    tab.value = TAB_BREEDS;
+  }
 </script>
 
 <template>
@@ -22,7 +59,7 @@
           <h1>Dog Breeds Explorer</h1>
         </div>
         <nav class="nav">
-          <button :class="{ active: tab === 'breeds' }" @click="tab = 'breeds'" class="nav-btn">
+          <button :class="{ active: tab === TAB_BREEDS }" @click="tab = TAB_BREEDS" class="nav-btn">
             <span class="nav-icon">
               <svg
                 width="20"
@@ -40,8 +77,8 @@
             Breeds
           </button>
           <button
-            :class="{ active: tab === 'favorites' }"
-            @click="tab = 'favorites'"
+            :class="{ active: tab === TAB_FAVORITES }"
+            @click="tab = TAB_FAVORITES"
             class="nav-btn"
           >
             <span class="nav-icon">
@@ -66,7 +103,7 @@
 
     <main class="main">
       <div class="container">
-        <BreedList v-if="tab === 'breeds'" />
+        <BreedList v-if="tab === TAB_BREEDS" />
         <FavoritesList v-else />
       </div>
     </main>
