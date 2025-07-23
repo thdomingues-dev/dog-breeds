@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Lock files
+package-lock.json
+yarn.lock 
